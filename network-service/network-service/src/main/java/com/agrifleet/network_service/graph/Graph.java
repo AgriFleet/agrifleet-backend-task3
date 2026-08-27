@@ -24,4 +24,24 @@ public class Graph {
         adjacencyList.get(edge.u()).add(edge);
         adjacencyList.get(edge.v()).add(edge);
     }
+
+    public List<GraphEdge> getNeighbors(int nodeId) {
+        return adjacencyList.getOrDefault(nodeId, new ArrayList<>());
+    }
+
+    public Map<Integer, GraphNode> getNodes() {
+        return nodes;
+    }
+
+    public List<GraphEdge> getEdges() {
+        return edges;
+    }
+
+    public int getNodeCount() {
+        return nodes.size();
+    }
+
+    public int getEdgeCount() {
+        return edges.size();
+    }
 }
