@@ -17,34 +17,34 @@ public class NetworkAnalysisController {
     public NetworkAnalysisController(
             NetworkAnalysisService networkAnalysisService
     ) {
-        this.networkAnalysisService = networkAnalysisService;
+        this.networkAnalysisService =
+                networkAnalysisService;
     }
 
     @GetMapping("/analyze")
     public ResponseEntity<NetworkAnalysisResponse> analyze(
-            @RequestParam(defaultValue = "101")
-            int regionId
+            @RequestParam int regionId
     ) {
 
-        NetworkAnalysisResponse response =
-                networkAnalysisService.analyzeNetwork(regionId);
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(
+                networkAnalysisService.analyzeNetwork(
+                        regionId
+                )
+        );
     }
 
     @PostMapping("/weight-check")
     public ResponseEntity<WeightCheckResponse> checkWeight(
-            @Valid @RequestBody WeightCheckRequest request
+            @Valid
+            @RequestBody WeightCheckRequest request
     ) {
 
-        WeightCheckResponse response =
+        return ResponseEntity.ok(
                 networkAnalysisService.checkVehicleWeight(
                         request.uNode(),
                         request.vNode(),
                         request.vehicleWeightTonnes()
-                );
-
-        return ResponseEntity.ok(response);
+                )
+        );
     }
-
 }

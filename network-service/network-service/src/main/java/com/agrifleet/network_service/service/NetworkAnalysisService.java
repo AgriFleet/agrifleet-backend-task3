@@ -1,8 +1,11 @@
 package com.agrifleet.network_service.service;
 
+import com.agrifleet.network_service.algorithm.TarjanBridgeDetector;
 import com.agrifleet.network_service.algorithm.kruskal.KruskalMst;
 import com.agrifleet.network_service.dto.NetworkAnalysisResponse;
 import com.agrifleet.network_service.dto.WeightCheckResponse;
+import com.agrifleet.network_service.graph.Graph;
+import com.agrifleet.network_service.graph.GraphEdge;
 import com.agrifleet.network_service.repository.NetworkResultRepository;
 import com.agrifleet.network_service.repository.RoadNetworkRepository;
 import org.springframework.stereotype.Service;
@@ -30,9 +33,24 @@ public class NetworkAnalysisService {
         this.kruskalMst = kruskalMst;
     }
 
-    public NetworkAnalysisResponse analyzeNetwork(int regionId) {
+    public NetworkAnalysisResponse analyzeNetwork(
+            int regionId
+    ) {
 
-        Graph graph = roadNetworkRepository.loadGraph();
+        if (regionId <= 0) {
+            throw new IllegalArgumentException(
+                    "Region ID must be greater than zero."
+            );
+        }
+
+        Graph graph =
+                roadNetworkRepository.loadGraph();
+
+        if (graph.getNodeCount() == 0) {
+            throw new IllegalStateException(
+                    "Road network contains no nodes."
+            );
+        }
 
         List<GraphEdge> bridges =
                 tarjanBridgeDetector.findBridges(graph);
@@ -40,35 +58,46 @@ public class NetworkAnalysisService {
         KruskalMst.MstResult mst =
                 kruskalMst.findMst(graph);
 
-        networkResultRepository.clearAnalysisResults(regionId);
+        networkResultRepository
+                .clearAnalysisResults(regionId);
 
         for (GraphEdge bridge : bridges) {
-            networkResultRepository.saveBridge(regionId, bridge);
+            networkResultRepository.saveBridge(
+                    regionId,
+                    bridge
+            );
         }
 
-        networkResultRepository.saveMst(regionId, mst);
+        networkResultRepository.saveMst(
+                regionId,
+                mst
+        );
 
-        List<NetworkAnalysisResponse.BridgeResponse> bridgeResponses =
+        List<NetworkAnalysisResponse.BridgeResponse>
+                bridgeResponses =
                 bridges.stream()
                         .map(edge ->
-                                new NetworkAnalysisResponse.BridgeResponse(
-                                        edge.getU(),
-                                        edge.getV(),
-                                        edge.getWeight(),
-                                        edge.getMaxWeightTonnes()
-                                )
+                                new NetworkAnalysisResponse
+                                        .BridgeResponse(
+                                                edge.u(),
+                                                edge.v(),
+                                                edge.weight(),
+                                                edge.maxWeightTonnes()
+                                        )
                         )
                         .toList();
 
-        List<NetworkAnalysisResponse.MstEdgeResponse> mstEdges =
+        List<NetworkAnalysisResponse.MstEdgeResponse>
+                mstEdges =
                 mst.selectedEdges()
                         .stream()
                         .map(edge ->
-                                new NetworkAnalysisResponse.MstEdgeResponse(
-                                        edge.getU(),
-                                        edge.getV(),
-                                        edge.getWeight()
-                                )
+                                new NetworkAnalysisResponse
+                                        .MstEdgeResponse(
+                                                edge.u(),
+                                                edge.v(),
+                                                edge.weight()
+                                        )
                         )
                         .toList();
 
@@ -88,14 +117,33 @@ public class NetworkAnalysisService {
         );
     }
 
-    /**
-     * Checks whether a machine can safely cross a road.
-     */
     public WeightCheckResponse checkVehicleWeight(
             int uNode,
             int vNode,
             double vehicleWeightTonnes
     ) {
+
+        if (uNode <= 0 || vNode <= 0) {
+            return new WeightCheckResponse(
+                    uNode,
+                    vNode,
+                    vehicleWeightTonnes,
+                    0.0,
+                    false,
+                    "Node IDs must be greater than zero."
+            );
+        }
+
+        if (vehicleWeightTonnes < 0) {
+            return new WeightCheckResponse(
+                    uNode,
+                    vNode,
+                    vehicleWeightTonnes,
+                    0.0,
+                    false,
+                    "Vehicle weight cannot be negative."
+            );
+        }
 
         Optional<Double> limit =
                 roadNetworkRepository.findRoadWeightLimit(
@@ -104,6 +152,7 @@ public class NetworkAnalysisService {
                 );
 
         if (limit.isEmpty()) {
+
             return new WeightCheckResponse(
                     uNode,
                     vNode,
@@ -119,9 +168,10 @@ public class NetworkAnalysisService {
         boolean allowed =
                 vehicleWeightTonnes <= roadLimit;
 
-        String message = allowed
-                ? "Vehicle is allowed to use this road."
-                : "Vehicle exceeds the road weight restriction.";
+        String message =
+                allowed
+                        ? "Vehicle is allowed to use this road."
+                        : "Vehicle exceeds the road weight restriction.";
 
         return new WeightCheckResponse(
                 uNode,
@@ -132,5 +182,4 @@ public class NetworkAnalysisService {
                 message
         );
     }
-
 }
