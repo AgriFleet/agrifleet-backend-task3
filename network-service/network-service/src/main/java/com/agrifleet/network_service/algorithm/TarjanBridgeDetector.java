@@ -3,6 +3,8 @@ package com.agrifleet.network_service.algorithm;
 import com.agrifleet.network_service.graph.Graph;
 import com.agrifleet.network_service.graph.GraphEdge;
 
+import org.springframework.stereotype.Component;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -10,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+@Component
 public class TarjanBridgeDetector {
 
     private final Set<Integer> visited = new HashSet<>();
