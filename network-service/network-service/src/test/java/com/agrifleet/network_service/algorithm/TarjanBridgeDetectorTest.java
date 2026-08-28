@@ -8,6 +8,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -83,5 +85,72 @@ class TarjanBridgeDetectorTest {
 
         assertEquals(1, bridges.size());
         assertEquals(stickEdge.id(), bridges.get(0).id());
+    }
+
+    @Test
+    @DisplayName("Test 4: Disconnected farm clusters find bridges in all components")
+    void testDisconnectedComponents() {
+        Graph graph = new Graph();
+
+        // Cluster 1 (Nodes 1, 2)
+        graph.addNode(new GraphNode(1, "Cluster1 Node1", 6.9, 79.8));
+        graph.addNode(new GraphNode(2, "Cluster1 Node2", 6.91, 79.81));
+        GraphEdge c1Edge = new GraphEdge(101, 1, 2, 2.0, 20.0);
+        graph.addEdge(c1Edge);
+
+        // Cluster 2 (Nodes 3, 4)
+        graph.addNode(new GraphNode(3, "Cluster2 Node3", 7.0, 80.0));
+        graph.addNode(new GraphNode(4, "Cluster2 Node4", 7.01, 80.01));
+        GraphEdge c2Edge = new GraphEdge(102, 3, 4, 3.0, 20.0);
+        graph.addEdge(c2Edge);
+
+        List<GraphEdge> bridges = detector.findBridges(graph);
+
+        assertEquals(2, bridges.size());
+        assertTrue(bridges.contains(c1Edge));
+        assertTrue(bridges.contains(c2Edge));
+    }
+
+    @Test
+    @DisplayName("Test 5: AgriFleet Specification 10-Node Rural Network Benchmark")
+    void testAgriFleetSpecificationNetwork() {
+        Graph graph = new Graph();
+
+        for (int i = 1; i <= 10; i++) {
+            graph.addNode(new GraphNode(i, "Node " + i, 6.9 + (i * 0.01), 79.8 + (i * 0.01)));
+        }
+
+        // Loop region Alpha (1 - 2 - 5 - 6 - 1)
+        graph.addEdge(new GraphEdge(1, 1, 2, 1.75, 30.0));
+        graph.addEdge(new GraphEdge(2, 2, 5, 4.20, 30.0));
+        graph.addEdge(new GraphEdge(3, 5, 6, 4.50, 30.0));
+        graph.addEdge(new GraphEdge(4, 6, 1, 2.10, 30.0));
+
+        // Critical Bridge 1: 2 - 3 (Connects region Alpha to region Beta)
+        GraphEdge bridge23 = new GraphEdge(5, 2, 3, 2.20, 28.0);
+        graph.addEdge(bridge23);
+
+        // Loop region Beta (3 - 4 - 10 - 3)
+        graph.addEdge(new GraphEdge(6, 3, 4, 1.90, 25.0));
+        graph.addEdge(new GraphEdge(7, 4, 10, 5.10, 25.0));
+        graph.addEdge(new GraphEdge(8, 10, 3, 3.60, 25.0));
+
+        // Critical Bridge 2: 6 - 7 (Connects Depot 6 to Outpost 7)
+        GraphEdge bridge67 = new GraphEdge(9, 6, 7, 4.44, 18.0);
+        graph.addEdge(bridge67);
+
+        // Critical Bridge 3: 6 - 8 (Connects to Silo 8) and 8 - 9 (Connects Silo 8 to Farm 9)
+        graph.addEdge(new GraphEdge(10, 6, 8, 2.30, 22.0));
+        GraphEdge bridge89 = new GraphEdge(11, 8, 9, 3.10, 12.0);
+        graph.addEdge(bridge89);
+
+        List<GraphEdge> bridges = detector.findBridges(graph);
+        Set<Integer> bridgeEdgeIds = bridges.stream().map(GraphEdge::id).collect(Collectors.toSet());
+
+        // Must find critical bridge roads: 2-3 (id 5), 6-7 (id 9), 6-8 (id 10), 8-9 (id 11)
+        assertTrue(bridgeEdgeIds.contains(5));
+        assertTrue(bridgeEdgeIds.contains(9));
+        assertTrue(bridgeEdgeIds.contains(10));
+        assertTrue(bridgeEdgeIds.contains(11));
     }
 }
