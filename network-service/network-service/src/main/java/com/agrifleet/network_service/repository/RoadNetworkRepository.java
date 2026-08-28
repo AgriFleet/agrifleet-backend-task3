@@ -36,10 +36,7 @@ public class RoadNetworkRepository {
                         rs.getInt("node_id"),
                         rs.getString("node_name"),
                         rs.getDouble("lat"),
-                        rs.getDouble("lng"),
-                        rs.getDouble("elevation_meters"),
-                        rs.getInt("is_farm_gate") == 1,
-                        rs.getInt("is_depot") == 1
+                        rs.getDouble("lng")
                 )
         );
 
