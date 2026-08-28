@@ -1,9 +1,11 @@
 package com.agrifleet.network_service.repository;
 
 import com.agrifleet.network_service.algorithm.kruskal.KruskalMst;
+import com.agrifleet.network_service.graph.GraphEdge;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 @Repository
@@ -55,9 +57,9 @@ public class NetworkResultRepository {
                 VALUES (?, ?, ?, 1, 0, ?, 0, NULL)
                 """,
                 regionId,
-                edge.getU(),
-                edge.getV(),
-                edge.getMaxWeightTonnes()
+                edge.u(),
+                edge.v(),
+                edge.maxWeightTonnes()
         );
     }
 
@@ -92,9 +94,9 @@ public class NetworkResultRepository {
         return String.format(
                 Locale.US,
                 "{\"u\":%d,\"v\":%d,\"w\":%.3f}",
-                edge.getU(),
-                edge.getV(),
-                edge.getWeight()
+                edge.u(),
+                edge.v(),
+                edge.weight()
         );
     }
 
