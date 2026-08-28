@@ -34,23 +34,23 @@ public class TarjanBridgeDetector {
         return bridges;
     }
 
-    private void dfs(int u, int parent, Graph graph) {
+    private void dfs(int u, int parentEdgeId, Graph graph) {
         visited.add(u);
         timer++;
         tin.put(u, timer);
         low.put(u, timer);
 
         for (GraphEdge edge : graph.getNeighbors(u)) {
-            int v = edge.getOtherNode(u);
-
-            if (v == parent) {
+            if (edge.id() == parentEdgeId) {
                 continue;
             }
+
+            int v = edge.getOtherNode(u);
 
             if (visited.contains(v)) {
                 low.put(u, Math.min(low.get(u), tin.get(v)));
             } else {
-                dfs(v, u, graph);
+                dfs(v, edge.id(), graph);
 
                 low.put(u, Math.min(low.get(u), low.get(v)));
 
