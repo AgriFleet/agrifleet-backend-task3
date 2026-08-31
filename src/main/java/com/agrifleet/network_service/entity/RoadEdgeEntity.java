@@ -23,7 +23,6 @@ public class RoadEdgeEntity {
     @Column(name = "max_weight_tonnes")
     private Double maxWeightTonnes;
 
-    // Getters and Setters
     public Long getEdgeId() { return edgeId; }
     public Long getUNode() { return uNode; }
     public Long getVNode() { return vNode; }

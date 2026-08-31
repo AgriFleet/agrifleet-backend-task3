@@ -30,7 +30,6 @@ public class NetworkService {
     }
 
     public Map<String, Object> analyzeRegion(Long regionId) {
-        // 1. Fetch live edges dynamically from the SQLite 'road_edges' table
         List<RoadEdgeEntity> dbEdges = roadEdgeRepository.findAll();
         List<TarjanBridgeDetector.Edge> edges = new ArrayList<>();
 
@@ -44,11 +43,9 @@ public class NetworkService {
             maxNodeId = Math.max(maxNodeId, Math.max(dbEdge.getUNode().intValue(), dbEdge.getVNode().intValue()));
         }
 
-        // 2. Run Tarjan's Bridge Detection on live DB records
         TarjanBridgeDetector detector = new TarjanBridgeDetector();
         List<TarjanBridgeDetector.Edge> bridges = detector.findBridges(maxNodeId, edges);
 
-        // 3. Run Kruskal's MST on live DB records
         KruskalMST.MSTResult mstResult = KruskalMST.calculateMST(maxNodeId, edges);
 
         Map<String, Object> response = new HashMap<>();
@@ -61,9 +58,8 @@ public class NetworkService {
     }
 
     public Map<String, Object> checkWeightLimit(Long uNode, Long vNode, Double vehicleWeightTonnes) {
-        // Dynamically find the weight tolerance for this specific edge from the database
         List<RoadEdgeEntity> allEdges = roadEdgeRepository.findAll();
-        double bridgeLimit = 40.0; // Default safety threshold
+        double bridgeLimit = 40.0;
 
         Optional<RoadEdgeEntity> matchedEdge = allEdges.stream()
                 .filter(e -> (e.getUNode().equals(uNode) && e.getVNode().equals(vNode)) ||

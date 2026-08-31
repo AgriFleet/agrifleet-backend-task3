@@ -23,7 +23,6 @@ public class MstBackboneEntity {
     @Column(name = "last_recalculated", insertable = false, updatable = false)
     private String lastRecalculated;
 
-    // Getters and Setters
     public Long getBackboneId() { return backboneId; }
     public void setBackboneId(Long backboneId) { this.backboneId = backboneId; }
     public Long getRegionId() { return regionId; }

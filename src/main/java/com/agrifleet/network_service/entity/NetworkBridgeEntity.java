@@ -38,7 +38,6 @@ public class NetworkBridgeEntity {
     @Column(name = "discovered_at", insertable = false, updatable = false)
     private String discoveredAt;
 
-    // Getters and Setters
     public Long getCutId() { return cutId; }
     public void setCutId(Long cutId) { this.cutId = cutId; }
     public Long getRegionId() { return regionId; }
