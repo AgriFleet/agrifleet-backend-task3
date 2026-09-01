@@ -17,6 +17,11 @@ public class NetworkController {
         this.networkService = networkService;
     }
 
+    @GetMapping("/graph")
+    public ResponseEntity<Map<String, Object>> getGraph() {
+        return ResponseEntity.ok(networkService.getGraph());
+    }
+
     @GetMapping("/analyze")
     public ResponseEntity<Map<String, Object>> analyzeRegion(@RequestParam Long regionId) {
         return ResponseEntity.ok(networkService.analyzeRegion(regionId));
